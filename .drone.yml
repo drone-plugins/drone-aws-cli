@@ -49,7 +49,7 @@ steps:
     image: plugins/docker
     settings:
       dockerfile: docker/Dockerfile.linux.arm64
-      repo: plugins/slack
+      repo:  plugins/aws-cli
       username:
         from_secret: docker_username
       password:
@@ -92,7 +92,7 @@ steps:
     image: plugins/docker
     settings:
       dockerfile: docker/Dockerfile
-      repo: plugins/slack
+      repo: plugins/aws-cli
       username:
         from_secret: docker_username
       password:
