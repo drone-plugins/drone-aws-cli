@@ -163,12 +163,12 @@ func installAWSCLI(args Args) error {
 		case "amd64":
 			cmd = exec.Command("sh", "-c", `curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64$1.zip" -o "awscliv2.zip"
 				unzip -q -o awscliv2.zip
-				sudo ./aws/install -i "${PARAM_AWS_CLI_INSTALL_DIR}" -b "${PARAM_AWS_CLI_BINARY_DIR}"
+				sudo ./aws/install -i "${PLUGIN_INSTALL_DIR}" -b "${PLUGIN_BINARY_DIR}"
 				rm -r awscliv2.zip ./aws`, args.Version)
 		case "arm64":
 			cmd = exec.Command("sh", "-c", `curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-aarch64$1.zip" -o "awscliv2.zip"
 				unzip -q -o awscliv2.zip
-				sudo ./aws/install -i "${PARAM_AWS_CLI_INSTALL_DIR}" -b "${PARAM_AWS_CLI_BINARY_DIR}"
+				sudo ./aws/install -i "${PLUGIN_INSTALL_DIR}" -b "${PLUGIN_BINARY_DIR}"
 				rm -r awscliv2.zip ./aws`, args.Version)
 		default:
 			return fmt.Errorf("unsupported architecture: %s", runtime.GOARCH)
