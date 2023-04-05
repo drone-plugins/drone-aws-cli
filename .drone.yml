@@ -8,6 +8,7 @@ steps:
   commands:
   - go build
   - go test ./...
+  - sh scripts/build.sh
 
 - name: publish
   image: plugins/docker
