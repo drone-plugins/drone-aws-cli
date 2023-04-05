@@ -108,11 +108,14 @@ trigger:
     - refs/pull/**
 ---
 kind: pipeline
-type: docker
+type: vm
 name: manifest
 platform:
   os: linux
-  arch: arm64
+  arch: amd64
+pool:
+  use: ubuntu
+
 steps:
   - name: manifest
     image: plugins/manifest
