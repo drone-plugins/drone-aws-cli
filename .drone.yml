@@ -22,7 +22,7 @@ steps:
       from_secret: docker_password
 ---
 kind: pipeline
-type: docker
+type: vm
 name: linux-arm64
 platform:
   os: linux
@@ -57,7 +57,7 @@ steps:
       auto_tag: true
       auto_tag_suffix: linux-arm64
 depends_on:
-  - build
+  - default
 trigger:
   ref:
     - refs/heads/master
@@ -100,7 +100,7 @@ steps:
       auto_tag: true
       auto_tag_suffix: linux-amd64
 depends_on:
-  - build
+  - default
 trigger:
   ref:
     - refs/heads/master
