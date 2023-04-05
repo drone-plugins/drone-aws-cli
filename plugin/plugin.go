@@ -178,8 +178,8 @@ func installAWSCLI(args Args) error {
 	}
 
 	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, fmt.Sprintf("PARAM_AWS_CLI_INSTALL_DIR=%s", args.InstallDir))
-	cmd.Env = append(cmd.Env, fmt.Sprintf("PARAM_AWS_CLI_BINARY_DIR=%s", args.BinaryDir))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("PLUGIN_INSTALL_DIR=%s", args.InstallDir))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("PLUGIN_BINARY_DIR=%s", args.BinaryDir))
 
 	err := cmd.Run()
 	if err != nil {
