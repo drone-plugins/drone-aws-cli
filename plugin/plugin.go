@@ -85,13 +85,10 @@ func Exec(ctx context.Context, args Args) error {
 		}
 	}
 	err := installAWSCLI(args)
-	log.Printf("AWS CLI binary path: %s\n", args.BinaryDir)
-
-	os.Setenv("PATH", fmt.Sprintf("%s:%s", args.BinaryDir, os.Getenv("PATH")))
-
 	if err != nil {
 		return fmt.Errorf("Error: %v\n", err)
 	}
+
 	err = configureCredentials(args)
 	if err != nil {
 		return fmt.Errorf("Error: %v\n", err)
@@ -108,7 +105,84 @@ func Exec(ctx context.Context, args Args) error {
 	return nil
 }
 
+func installAWSCLI(args Args) error {
+	if !args.OverrideInstalled {
+		_, err := exec.LookPath("aws")
+		if err == nil {
+			fmt.Println("AWS CLI is already installed. Skipping installation.")
+			return nil
+		}
+	}
+
+	// Installation process
+	var cmd *exec.Cmd
+
+	switch runtime.GOOS {
+	case "darwin":
+		log.Println("Installing AWS CLI for macOS")
+		cmd = exec.Command("sh", "-c", `curl -sSL "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+            sudo installer -pkg AWSCLIV2.pkg -target /
+            rm AWSCLIV2.pkg`)
+	case "linux":
+		switch runtime.GOARCH {
+		case "amd64":
+			log.Println("Installing AWS CLI for Linux")
+			cmd = exec.Command("sh", "-c", fmt.Sprintf(`curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                unzip -q -o awscliv2.zip
+				sudo ./aws/install -i "%s" -b "%s"
+                rm -r awscliv2.zip`, args.InstallDir, args.BinaryDir))
+		case "arm64":
+			log.Println("Installing AWS CLI for Linux arm64")
+			cmd = exec.Command("sh", "-c", fmt.Sprintf(`curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+            unzip -q -o awscliv2.zip
+		 	sudo ./aws/install -i "%s" -b "%s"
+            rm -r awscliv2.zip`, args.InstallDir, args.BinaryDir))
+		default:
+			return fmt.Errorf("unsupported architecture: %s", runtime.GOARCH)
+		}
+	case "windows":
+		if _, err := exec.LookPath("choco"); err != nil {
+			return fmt.Errorf("chocolatey is required to install AWS CLI on Windows")
+		}
+		cmd = exec.Command("choco", "install", "awscli", "--version", args.Version)
+	case "linux_alpine":
+		if runtime.GOARCH == "amd64" {
+			cmd = exec.Command("sh", "-c", fmt.Sprintf(`apk --no-cache add groff curl python3 && \
+            curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+            unzip -q -o awscliv2.zip && \
+            sudo ./aws/install -i "%s" -b "%s" && \
+            rm -r awscliv2.zip ./aws`, args.InstallDir, args.BinaryDir))
+		} else {
+			return fmt.Errorf("unsupported architecture: %s", runtime.GOARCH)
+		}
+	default:
+		return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+	}
+
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, fmt.Sprintf("PLUGIN_INSTALL_DIR=%s", args.InstallDir))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("PLUGIN_BINARY_DIR=%s", args.BinaryDir))
+	os.Setenv("PATH", fmt.Sprintf("%s:%s", args.BinaryDir, os.Getenv("PATH")))
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("command failed: %v\n%s", err, string(output))
+	}
+	log.Println("AWS CLI installed successfully")
+
+	if args.DisableAWSPager {
+		disablePagerCmd := exec.Command("aws", "configure", "set", "cli_pager", "")
+		err = disablePagerCmd.Run()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func configureCredentials(args Args) error {
+	log.Println("Configuring AWS credentials")
 	if args.AWSAccessKeyID == "" {
 		return fmt.Errorf("AWS access key ID not provided")
 	}
@@ -158,70 +232,12 @@ func configureCredentials(args Args) error {
 			return err
 		}
 	}
-
-	return nil
-}
-
-func installAWSCLI(args Args) error {
-	log.Println("Installing AWS CLI")
-	if !args.OverrideInstalled {
-		_, err := exec.LookPath("aws")
-		if err == nil {
-			fmt.Println("AWS CLI is already installed. Skipping installation.")
-			return nil
-		}
-	}
-
-	// Installation process
-	var cmd *exec.Cmd
-
-	switch runtime.GOOS {
-	case "darwin":
-		cmd = exec.Command("sh", "-c", `curl -sSL "https://awscli.amazonaws.com/AWSCLIV2$1.pkg" -o "AWSCLIV2.pkg"
-			sudo installer -pkg AWSCLIV2.pkg -target /
-			rm AWSCLIV2.pkg`, args.Version)
-	case "linux":
-		switch runtime.GOARCH {
-		case "amd64":
-			cmd = exec.Command("sh", "-c", `curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64$1.zip" -o "awscliv2.zip"
-				unzip -q -o awscliv2.zip
-				sudo ./aws/install -i "${PLUGIN_INSTALL_DIR}" -b "${PLUGIN_BINARY_DIR}"
-				rm -r awscliv2.zip ./aws`, args.Version)
-		case "arm64":
-			cmd = exec.Command("sh", "-c", `curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-aarch64$1.zip" -o "awscliv2.zip"
-				unzip -q -o awscliv2.zip
-				sudo ./aws/install -i "${PLUGIN_INSTALL_DIR}" -b "${PLUGIN_BINARY_DIR}"
-				rm -r awscliv2.zip ./aws`, args.Version)
-		default:
-			return fmt.Errorf("unsupported architecture: %s", runtime.GOARCH)
-		}
-	default:
-		return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
-	}
-
-	log.Println("AWS CLI installed successfully")
-
-	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, fmt.Sprintf("PLUGIN_INSTALL_DIR=%s", args.InstallDir))
-	cmd.Env = append(cmd.Env, fmt.Sprintf("PLUGIN_BINARY_DIR=%s", args.BinaryDir))
-
-	err := cmd.Run()
-	if err != nil {
-		return err
-	}
-
-	if args.DisableAWSPager {
-		disablePagerCmd := exec.Command("aws", "configure", "set", "cli_pager", "")
-		err = disablePagerCmd.Run()
-		if err != nil {
-			return err
-		}
-	}
-
+	log.Println("AWS credentials configured successfully")
 	return nil
 }
 
 func assumeRoleWithWebIdentity(args Args) error {
+	log.Println("Assuming role with web identity")
 	assumeRoleCmd := exec.Command("aws", "sts", "assume-role-with-web-identity",
 		"--role-arn", args.RoleARN,
 		"--role-session-name", args.RoleSessionName,
@@ -233,7 +249,6 @@ func assumeRoleWithWebIdentity(args Args) error {
 		return fmt.Errorf("failed to assume role with web identity: %v\n%s", err, string(output))
 	}
 
-	fmt.Printf("Assumed role with web identity:\n%s\n", string(output))
-
+	log.Printf("Assumed role with web identity:\n%s\n", string(output))
 	return nil
 }

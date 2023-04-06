@@ -1,13 +1,11 @@
-FROM alpine:3.6 as alpine
-RUN apk add -U --no-cache ca-certificates
+FROM debian:buster-slim
 
-FROM alpine:3.6
 ENV GODEBUG netdns=go
 
-COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-
 # Install required packages
-RUN apk add --no-cache unzip groff curl
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates unzip groff curl sudo && \
+    rm -rf /var/lib/apt/lists/*
 
 ADD release/linux/arm64/plugin /bin/
 ENTRYPOINT ["/bin/plugin"]
