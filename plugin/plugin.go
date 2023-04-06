@@ -86,7 +86,8 @@ func Exec(ctx context.Context, args Args) error {
 	}
 	err := installAWSCLI(args)
 	log.Printf("AWS CLI binary path: %s\n", args.BinaryDir)
-	// Add the AWS CLI binary path to the PATH environment variable
+
+	os.Setenv("PATH", fmt.Sprintf("%s:%s", args.BinaryDir, os.Getenv("PATH")))
 
 	if err != nil {
 		return fmt.Errorf("Error: %v\n", err)
@@ -203,7 +204,6 @@ func installAWSCLI(args Args) error {
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, fmt.Sprintf("PLUGIN_INSTALL_DIR=%s", args.InstallDir))
 	cmd.Env = append(cmd.Env, fmt.Sprintf("PLUGIN_BINARY_DIR=%s", args.BinaryDir))
-	cmd.Env = append(cmd.Env, fmt.Sprintf("PATH=%s:%s", args.BinaryDir, os.Getenv("PATH")))
 
 	err := cmd.Run()
 	if err != nil {
