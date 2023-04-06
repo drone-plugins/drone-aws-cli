@@ -7,6 +7,7 @@ package plugin
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -67,7 +68,26 @@ type Args struct {
 
 // Exec executes the plugin.
 func Exec(ctx context.Context, args Args) error {
+	// Set default value for args.BinaryDir if not provided
+	log.Println("Starting AWS CLI plugin")
+	if args.InstallDir == "" {
+		if runtime.GOOS == "windows" {
+			args.InstallDir = `C:\Program Files\Amazon\AWSCLI`
+		} else {
+			args.InstallDir = "/usr/local/aws-cli"
+		}
+	}
+	if args.BinaryDir == "" {
+		if runtime.GOOS == "windows" {
+			args.BinaryDir = `C:\Program Files\Amazon\AWSCLI\bin`
+		} else {
+			args.BinaryDir = "/usr/local/bin"
+		}
+	}
 	err := installAWSCLI(args)
+	log.Printf("AWS CLI binary path: %s\n", args.BinaryDir)
+	// Add the AWS CLI binary path to the PATH environment variable
+
 	if err != nil {
 		return fmt.Errorf("Error: %v\n", err)
 	}
@@ -83,6 +103,7 @@ func Exec(ctx context.Context, args Args) error {
 		}
 	}
 
+	log.Println("AWS CLI plugin completed successfully")
 	return nil
 }
 
@@ -141,7 +162,7 @@ func configureCredentials(args Args) error {
 }
 
 func installAWSCLI(args Args) error {
-	// Check if AWS CLI is already installed and override is not enabled
+	log.Println("Installing AWS CLI")
 	if !args.OverrideInstalled {
 		_, err := exec.LookPath("aws")
 		if err == nil {
@@ -177,9 +198,12 @@ func installAWSCLI(args Args) error {
 		return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
 	}
 
+	log.Println("AWS CLI installed successfully")
+
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, fmt.Sprintf("PLUGIN_INSTALL_DIR=%s", args.InstallDir))
 	cmd.Env = append(cmd.Env, fmt.Sprintf("PLUGIN_BINARY_DIR=%s", args.BinaryDir))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("PATH=%s:%s", args.BinaryDir, os.Getenv("PATH")))
 
 	err := cmd.Run()
 	if err != nil {
