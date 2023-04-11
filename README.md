@@ -1,4 +1,4 @@
-# AWS CLI Plugin
+# DRONE AWS-CLI Plugin
 
 The aws-cli plugin is designed to automate the installation, configuration, and execution of the AWS Command Line Interface (CLI) in your CI pipeline. This plugin simplifies the process of setting up and managing AWS credentials and configurations within your pipeline, allowing you to easily interact with AWS services.
 
