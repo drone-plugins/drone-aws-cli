@@ -1,4 +1,4 @@
-module github.com/plugins/aws-cli
+module github.com/plugins/drone-aws-cli
 
 go 1.19
 

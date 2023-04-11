@@ -1,6 +1,6 @@
 # DRONE AWS-CLI Plugin
 
-The aws-cli plugin is designed to automate the installation, configuration, and execution of the AWS Command Line Interface (CLI) in your CI pipeline. This plugin simplifies the process of setting up and managing AWS credentials and configurations within your pipeline, allowing you to easily interact with AWS services.
+The drone aws-cli plugin is designed to automate the installation, configuration, and execution of the AWS Command Line Interface (CLI) in your CI pipeline. This plugin simplifies the process of setting up and managing AWS credentials and configurations within your pipeline, allowing you to easily interact with AWS services.
 
 Features of the plugin include:
 
@@ -23,8 +23,8 @@ The following settings changes this plugin's behavior.
 * aws_session_token (optional) sets the AWS Session Token.
 * binary_dir (optional) sets the binary directory for the AWS CLI. Default: /usr/local/bin.
 * disable_aws_pager (optional) controls AWS CLI output paging. Default: true.
-* install_dir (optional) sets the installation directory for the AWS CLI. Default: /usr/local/aws-cli.
-* install_dir (optional) sets the installation directory for the AWS CLI. Default: /usr/local/aws-cli.
+* install_dir (optional) sets the installation directory for the AWS CLI. Default: /usr/local/drone-aws-cli.
+* install_dir (optional) sets the installation directory for the AWS CLI. Default: /usr/local/drone-aws-cli.
 * override_installed (optional) controls whether to override the installed AWS CLI version. Default: false.
 * profile_name (optional) sets the profile name to be configured. Default: default.
 * role_arn (optional) sets the Role ARN for assuming an IAM role with web identity.
@@ -41,8 +41,8 @@ kind: pipeline
 name: default
 
 steps:
-  - name: run plugins/aws-cli plugin
-    image: plugins/aws-cli
+  - name: run plugins/drone-aws-cli plugin
+    image: plugins/drone-aws-cli
     pull: if-not-exists
     settings:
       aws_access_key_id: your_aws_access_key_id
@@ -51,7 +51,7 @@ steps:
       aws_session_token: your_aws_session_token
       binary_dir: /usr/local/bin
       disable_aws_pager: true
-      install_dir: /usr/local/aws-cli
+      install_dir: /usr/local/drone-aws-cli
       override_installed: false
       profile_name: default
       role_arn: your_role_arn
@@ -73,7 +73,7 @@ scripts/build.sh
 Build the plugin image:
 
 ```text
-docker build -t plugins/aws-cli -f docker/Dockerfile .
+docker build -t plugins/drone-aws-cli -f docker/Dockerfile .
 ```
 
 # Testing
@@ -93,6 +93,6 @@ docker run --rm \
   -e DRONE_BUILD_STATUS=success \
   -w /drone/src \
   -v $(pwd):/drone/src \
-  plugins/aws-cli
+  plugins/drone-aws-cli
 
 ```

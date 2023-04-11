@@ -13,7 +13,7 @@ steps:
 - name: publish
   image: plugins/docker
   settings:
-    repo: plugins/aws-cli
+    repo: plugins/drone-aws-cli
     auto_tag: true
     dockerfile: docker/Dockerfile
     username:
@@ -49,7 +49,7 @@ steps:
     image: plugins/docker
     settings:
       dockerfile: docker/Dockerfile.linux.arm64
-      repo:  plugins/aws-cli
+      repo:  plugins/drone-aws-cli
       username:
         from_secret: docker_username
       password:
@@ -92,7 +92,7 @@ steps:
     image: plugins/docker
     settings:
       dockerfile: docker/Dockerfile
-      repo: plugins/aws-cli
+      repo: plugins/drone-aws-cli
       username:
         from_secret: docker_username
       password:
