@@ -32,7 +32,7 @@ pool:
 
 steps:
   - name: environment
-    image: golang:1.19
+    image: golang:1.21
     pull: always
     environment:
       CGO_ENABLED: "0"
@@ -40,7 +40,7 @@ steps:
       - go version
       - go env
   - name: build
-    image: golang:1.19
+    image: golang:1.21
     environment:
       CGO_ENABLED: "0"
     commands:
@@ -75,7 +75,7 @@ pool:
 
 steps:
   - name: environment
-    image: golang:1.19
+    image: golang:1.21
     pull: always
     environment:
       CGO_ENABLED: "0"
@@ -83,7 +83,7 @@ steps:
       - go version
       - go env
   - name: build
-    image: golang:1.19
+    image: golang:1.21
     environment:
       CGO_ENABLED: "0"
     commands:
