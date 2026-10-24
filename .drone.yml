@@ -4,7 +4,7 @@ name: default
 
 steps:
 - name: build
-  image: golang
+  image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
   commands:
   - go build
   - go test ./...
@@ -13,6 +13,8 @@ steps:
 - name: publish
   image: plugins/docker
   settings:
+    pull_image: true
+    no_cache: true
     repo: plugins/drone-aws-cli
     auto_tag: true
     dockerfile: docker/Dockerfile
@@ -32,7 +34,7 @@ pool:
 
 steps:
   - name: environment
-    image: golang:1.21
+    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
     pull: always
     environment:
       CGO_ENABLED: "0"
@@ -40,7 +42,7 @@ steps:
       - go version
       - go env
   - name: build
-    image: golang:1.21
+    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
     environment:
       CGO_ENABLED: "0"
     commands:
@@ -48,6 +50,8 @@ steps:
   - name: docker
     image: plugins/docker
     settings:
+      pull_image: true
+      no_cache: true
       dockerfile: docker/Dockerfile.linux.arm64
       repo:  plugins/drone-aws-cli
       username:
@@ -75,7 +79,7 @@ pool:
 
 steps:
   - name: environment
-    image: golang:1.21
+    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
     pull: always
     environment:
       CGO_ENABLED: "0"
@@ -83,7 +87,7 @@ steps:
       - go version
       - go env
   - name: build
-    image: golang:1.21
+    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
     environment:
       CGO_ENABLED: "0"
     commands:
@@ -91,6 +95,8 @@ steps:
   - name: docker
     image: plugins/docker
     settings:
+      pull_image: true
+      no_cache: true
       dockerfile: docker/Dockerfile
       repo: plugins/drone-aws-cli
       username:

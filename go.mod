@@ -2,6 +2,8 @@ module github.com/plugins/drone-aws-cli
 
 go 1.19
 
+toolchain go1.26.10
+
 require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/sirupsen/logrus v1.9.3
